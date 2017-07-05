@@ -1,7 +1,7 @@
 /**
  * angular-input-masks
  * Personalized input masks for AngularJS
- * @version v1.4.2
+ * @version v1.4.2.3
  * @link http://github.com/assisrafael/angular-input-masks
  * @license MIT
  */
@@ -1592,26 +1592,37 @@ angular.module('ui.utils.masks.global.money', [
 						return value;
 					}
 
+                    var prefix = (angular.isDefined(attrs.uiNegativeNumber) && value < 0) ? '-' : '';
 					var valueToFormat = PreFormatters.prepareNumberToFormatter(value, decimals);
-					return moneyMask.apply(valueToFormat);
+					return prefix + moneyMask.apply(valueToFormat);
 				}
 
-				function parser(value) {
-					if (ctrl.$isEmpty(value)) {
-						return value;
-					}
+                function parser(value) {
+                    if (ctrl.$isEmpty(value)) {
+                        return value;
+                    }
 
-					var actualNumber = value.replace(/[^\d]+/g,'');
-					actualNumber = actualNumber.replace(/^[0]+([1-9])/,'$1');
-					var formatedValue = moneyMask.apply(actualNumber);
+                    var actualNumber = value.replace(/[^\d]+/g, '');
+                    actualNumber = actualNumber.replace(/^[0]+([1-9])/, '$1');
+                    var formatedValue = moneyMask.apply(actualNumber);
 
-					if (value !== formatedValue) {
-						ctrl.$setViewValue(formatedValue);
-						ctrl.$render();
-					}
+                    if (angular.isDefined(attrs.uiNegativeNumber)) {
+                        var isNegative = (value[0] === '-'),
+                            needsToInvertSign = (value.slice(-1) === '-');
 
-					return formatedValue ? parseInt(formatedValue.replace(/[^\d]+/g,''))/Math.pow(10,decimals) : null;
-				}
+                        if (needsToInvertSign ^ isNegative && !!actualNumber) {
+                            actualNumber *= -1;
+                            formatedValue = '-' + formatedValue;
+                        }
+                    }
+
+                    if (value !== formatedValue) {
+                        ctrl.$setViewValue(formatedValue);
+                        ctrl.$render();
+                    }
+
+                    return formatedValue ? parseInt(formatedValue.replace(/[^\d\-]+/g, '')) / Math.pow(10, decimals) : null;
+                }
 
 				ctrl.$formatters.push(formatter);
 				ctrl.$parsers.push(parser);
