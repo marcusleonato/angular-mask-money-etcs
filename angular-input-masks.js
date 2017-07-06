@@ -1621,8 +1621,8 @@ angular.module('ui.utils.masks.global.money', [
                         ctrl.$render();
                     }
 
-					return formatedValue ? parseInt(formatedValue.replace(/[^-?\d]+/g,''))/Math.pow(10,decimals) : null;
-				}
+                    return formatedValue ? parseInt(formatedValue.replace(/[^\d\-]+/g, '')) / Math.pow(10, decimals) : null;
+                }
 
 				ctrl.$formatters.push(formatter);
 				ctrl.$parsers.push(parser);
